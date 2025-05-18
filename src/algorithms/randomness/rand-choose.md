@@ -12,7 +12,7 @@ fn main() {
                             abcdefghijklmnopqrstuvwxyz\
                             0123456789)(*&^%$#@!~";
     const PASSWORD_LEN: usize = 30;
-    let mut rng = rand::thread_rng();
+ thread_rng   let mut rng = rand::rng();
 
     let password: String = (0..PASSWORD_LEN)
         .map(|_| {

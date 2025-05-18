@@ -8,7 +8,7 @@ Generates a random value within half-open `[0, 10)` range (not including `10`) w
 use rand::Rng;
 
 fn main() {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     println!("Integer: {}", rng.gen_range(0..10));
     println!("Float: {}", rng.gen_range(0.0..10.0));
 }
