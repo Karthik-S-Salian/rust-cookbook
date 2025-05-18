@@ -2,12 +2,10 @@
 
 [![rand-badge]][rand] [![cat-science-badge]][cat-science]
 
-Generates random numbers with help of random-number
-generator [`rand::Rng`] obtained via [`rand::rng`]. Integers are uniformly distributed over the range of the
-type, and floating point numbers are uniformly distributed from 0 up to but not
-including 1.
+Generates random numbers with help of random-number generator [rand::Rng](https://docs.rs/rand/*/rand/trait.Rng.html) obtained via [rand::rng](https://docs.rs/rand/*/rand/fn.rng.html). 
+Integers are uniformly distributed over the range of the type, and floating point numbers are uniformly distributed from 0 up to but not including 1.
 
-```rust,edition2018
+```rust,edition2024
 use rand::Rng;
 
 fn main() {
@@ -22,6 +20,3 @@ fn main() {
     println!("Random float: {}", rng.random::<f64>());
 }
 ```
-
-[`rand::Rng`]: https://docs.rs/rand/*/rand/trait.Rng.html
-[`rand::rng`]: https://docs.rs/rand/*/rand/fn.rng.html

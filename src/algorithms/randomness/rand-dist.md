@@ -12,13 +12,14 @@ generator [`rand::Rng`].
 The [distributions available are documented here][rand-distributions].
 An example using the [`Normal`] distribution is shown below.
 
-```rust,edition2018,ignore
+```rust,edition2024
 use rand_distr::{Distribution, Normal, NormalError};
-use rand::thread_rng;
+use rand::rng;
 
 fn main() -> Result<(), NormalError> {
-    let mut rng = thread_rng();
-    let normal = Normal::new(2.0, 3.0)?;
+    let mut rng = rng();
+    
+    let normal = Normal::new(2.0, 3.0)?; // mean 2, standard deviation 3
     let v = normal.sample(&mut rng);
     println!("{} is from a N(2, 9) distribution", v);
     Ok(())
