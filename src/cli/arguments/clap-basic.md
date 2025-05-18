@@ -34,6 +34,7 @@ fn main() {
         .arg(Arg::new("file")
                  .short('f')
                  .long("file")
+                 .default_value("input.txt")
                  .help("A cool file")
                  .value_parser(PathBufValueParser::default()))
         .arg(Arg::new("num")
@@ -42,8 +43,7 @@ fn main() {
                  .help("Five less than your favorite number"))
         .get_matches();
 
-    let default_file = PathBuf::from("input.txt");
-    let myfile: &PathBuf = matches.get_one("file").unwrap_or(&default_file);
+    let myfile = matches.get_one::<PathBuf>("file").unwrap();
     println!("The file passed is: {}", myfile.display());
 
     let num_str: Option<&String> = matches.get_one("num");
