@@ -7,18 +7,10 @@ the specified path prefix (`bundle/logs`).  Finally, extract the [`tar::Entry`]
 via [`Entry::unpack`].
 
 ```rust,edition2024,no_run
-# use error_chain::error_chain;
 use std::fs::File;
 use std::path::PathBuf;
 use flate2::read::GzDecoder;
 use tar::Archive;
-# 
-# error_chain! {
-#   foreign_links {
-#     Io(std::io::Error);
-#     StripPrefixError(::std::path::StripPrefixError);
-#   }
-# }
 
 fn main() -> Result<(), std::io::Error> {
     let file = File::open("archive.tar.gz")?;
