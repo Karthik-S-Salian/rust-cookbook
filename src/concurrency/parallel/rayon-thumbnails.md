@@ -8,24 +8,13 @@ then saves them in a new folder called `thumbnails`.
 [`glob::glob_with`] finds jpeg files in current directory. `rayon` resizes
 images in parallel using [`par_iter`] calling  [`DynamicImage::resize`].
 
-```rust,edition2018,no_run
-# use error_chain::error_chain;
-
-use std::path::Path;
-use std::fs::create_dir_all;
-
-# use error_chain::ChainedError;
-use glob::{glob_with, MatchOptions};
-use image::{FilterType, ImageError};
+```rust,edition2024,no_run
+use anyhow::{Result, anyhow};
+use glob::{MatchOptions, glob_with};
+use image::imageops::FilterType;
 use rayon::prelude::*;
-
-# error_chain! {
-#     foreign_links {
-#         Image(ImageError);
-#         Io(std::io::Error);
-#         Glob(glob::PatternError);
-#     }
-# }
+use std::fs::create_dir_all;
+use std::path::Path;
 
 fn main() -> Result<()> {
     let options: MatchOptions = Default::default();
@@ -34,7 +23,7 @@ fn main() -> Result<()> {
         .collect();
 
     if files.len() == 0 {
-        error_chain::bail!("No .jpg files found in current directory");
+        return Err(anyhow!("No .jpg files found in current directory"));
     }
 
     let thumb_dir = "thumbnails";
@@ -46,14 +35,17 @@ fn main() -> Result<()> {
         .par_iter()
         .map(|path| {
             make_thumbnail(path, thumb_dir, 300)
-                .map_err(|e| e.chain_err(|| path.display().to_string()))
+                .map_err(|_| format!("Failed to save thumbnail for '{}'", path.display()))
         })
         .filter_map(|x| x.err())
         .collect();
 
-    image_failures.iter().for_each(|x| println!("{}", x.display_chain()));
+    image_failures.iter().for_each(|x| println!("{}", x));
 
-    println!("{} thumbnails saved successfully", files.len() - image_failures.len());
+    println!(
+        "{} thumbnails saved successfully",
+        files.len() - image_failures.len()
+    );
     Ok(())
 }
 
@@ -65,7 +57,8 @@ where
     let img = image::open(original.as_ref())?;
     let file_path = thumb_dir.as_ref().join(original);
 
-    Ok(img.resize(longest_edge, longest_edge, FilterType::Nearest)
+    Ok(img
+        .resize(longest_edge, longest_edge, FilterType::Nearest)
         .save(file_path)?)
 }
 ```
