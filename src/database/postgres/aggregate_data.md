@@ -4,7 +4,7 @@
 
 This recipe lists the nationalities of the first 7999 artists in the database of the [`Museum of Modern Art`] in descending order.
 
-```rust,edition2018,no_run
+```rust,edition2024,no_run
 use postgres::{Client, Error, NoTls};
 
 struct Nation {
@@ -14,25 +14,45 @@ struct Nation {
 
 fn main() -> Result<(), Error> {
     let mut client = Client::connect(
-        "postgresql://postgres:postgres@127.0.0.1/moma",
+        "postgresql://karthikssalian:password@localhost:5432/booktest",
         NoTls,
     )?;
 
-    for row in client.query 
-	("SELECT nationality, COUNT(nationality) AS count 
-	FROM artists GROUP BY nationality ORDER BY count DESC", &[])? {
-        
-        let (nationality, count) : (Option<String>, Option<i64>) 
-		= (row.get (0), row.get (1));
-        
-        if nationality.is_some () && count.is_some () {
+    client.batch_execute(
+        "
+        CREATE TABLE IF NOT EXISTS artists (
+            id SERIAL PRIMARY KEY,
+            nationality VARCHAR NOT NULL
+        );
+        ",
+    )?;
 
-            let nation = Nation{
-                nationality: nationality.unwrap(),
-                count: count.unwrap(),
-        };
+    client.batch_execute(
+        "
+        INSERT INTO artists (nationality) VALUES
+            ('American'),
+            ('French'),
+            ('Japanese')
+        ON CONFLICT DO NOTHING;
+        ",
+    )?;
+
+    for row in client.query(
+        "SELECT nationality, COUNT(nationality) AS count
+         FROM artists
+         GROUP BY nationality
+         ORDER BY count DESC",
+        &[],
+    )? {
+        let nationality: Option<String> = row.get(0);
+        let count: Option<i64> = row.get(1);
+
+        if let (Some(nat), Some(cnt)) = (nationality, count) {
+            let nation = Nation {
+                nationality: nat,
+                count: cnt,
+            };
             println!("{} {}", nation.nationality, nation.count);
-            
         }
     }
 
