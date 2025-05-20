@@ -22,71 +22,71 @@ use num::complex::Complex;
 use std::sync::mpsc::{channel};
 use threadpool::ThreadPool;
 
-fn generate_color_linear_gradient(t: f32) -> [u8; 3] {
-    let t = t.clamp(0.0, 1.0);
-
-    let colors: &[[u8; 3]] = &[
-        [0, 0, 0],       // Black
-        [0, 0, 128],     // Dark Blue
-        [0, 0, 255],     // Blue
-        [0, 128, 255],   // Sky Blue
-        [255, 255, 255], // White
-        [255, 128, 0],   // Orange
-        [255, 0, 0],     // Red
-        [128, 0, 0],     // Dark Red
-        [0, 0, 0],       // Black
-    ];
-
-    let num_colors = colors.len() - 1;
-
-    let scaled_t = t * num_colors as f32;
-
-    let idx1 = scaled_t.floor() as usize;
-    let idx2 = (scaled_t.ceil() as usize).min(num_colors); 
-
-    let blend_factor = scaled_t - idx1 as f32;
-
-    let c1 = colors[idx1];
-    let c2 = colors[idx2];
-
-    [
-        (c1[0] as f32 * (1.0 - blend_factor) + c2[0] as f32 * blend_factor) as u8,
-        (c1[1] as f32 * (1.0 - blend_factor) + c2[1] as f32 * blend_factor) as u8,
-        (c1[2] as f32 * (1.0 - blend_factor) + c2[2] as f32 * blend_factor) as u8,
-    ]
-}
-
-fn juila(
-    x: u32,
-    y: u32,
-    width: u32,
-    height: u32,
-    zoom: f32,
-    c: Complex<f32>,
-    iterations: u32,
-    shift: Complex<f32>,
-) -> f32 {
-    let half_width = width as f32 * 0.5;
-    let half_height = height as f32 * 0.5;
-    let aspect_ratio = width as f32 / height as f32;
-
-    let mut z = Complex::new(
-        (x as f32 - half_width) / (zoom * half_width) * aspect_ratio,
-        (y as f32 - half_height) / (zoom * half_height),
-    ) + shift;
-
-    let mut i = 0;
-
-    while z.norm() < 4.0 && i <iterations {
-        let tmp = z.re*z.re - z.im * z.im  + c.re;
-        z.im = 2.0 * z.re * z.im + c.im;
-        z.re = tmp;
-        i += 1;
-    }
-    let norm = i as f32 / iterations as f32;
-    norm
-}
-
+# fn generate_color_linear_gradient(t: f32) -> [u8; 3] {
+#     let t = t.clamp(0.0, 1.0);
+# 
+#     let colors: &[[u8; 3]] = &[
+#         [0, 0, 0],       // Black
+#         [0, 0, 128],     // Dark Blue
+#         [0, 0, 255],     // Blue
+#         [0, 128, 255],   // Sky Blue
+#         [255, 255, 255], // White
+#         [255, 128, 0],   // Orange
+#         [255, 0, 0],     // Red
+#         [128, 0, 0],     // Dark Red
+#         [0, 0, 0],       // Black
+#     ];
+# 
+#     let num_colors = colors.len() - 1;
+# 
+#     let scaled_t = t * num_colors as f32;
+# 
+#     let idx1 = scaled_t.floor() as usize;
+#     let idx2 = (scaled_t.ceil() as usize).min(num_colors); 
+# 
+#     let blend_factor = scaled_t - idx1 as f32;
+# 
+#     let c1 = colors[idx1];
+#     let c2 = colors[idx2];
+# 
+#     [
+#         (c1[0] as f32 * (1.0 - blend_factor) + c2[0] as f32 * blend_factor) as u8,
+#         (c1[1] as f32 * (1.0 - blend_factor) + c2[1] as f32 * blend_factor) as u8,
+#         (c1[2] as f32 * (1.0 - blend_factor) + c2[2] as f32 * blend_factor) as u8,
+#     ]
+# }
+# 
+# fn juila(
+#     x: u32,
+#     y: u32,
+#     width: u32,
+#     height: u32,
+#     zoom: f32,
+#     c: Complex<f32>,
+#     iterations: u32,
+#     shift: Complex<f32>,
+# ) -> f32 {
+#     let half_width = width as f32 * 0.5;
+#     let half_height = height as f32 * 0.5;
+#     let aspect_ratio = width as f32 / height as f32;
+# 
+#     let mut z = Complex::new(
+#         (x as f32 - half_width) / (zoom * half_width) * aspect_ratio,
+#         (y as f32 - half_height) / (zoom * half_height),
+#     ) + shift;
+# 
+#     let mut i = 0;
+# 
+#     while z.norm() < 4.0 && i <iterations {
+#         let tmp = z.re*z.re - z.im * z.im  + c.re;
+#         z.im = 2.0 * z.re * z.im + c.im;
+#         z.re = tmp;
+#         i += 1;
+#     }
+#     let norm = i as f32 / iterations as f32;
+#     norm
+# }
+#
 fn main() {
     let width: u32 = 1920;
     let height: u32 = 1920;
