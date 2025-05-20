@@ -16,99 +16,109 @@ Create [`ThreadPool`] with thread count equal to number of cores with [`num_cpus
 [`ImageBuffer::put_pixel`] uses the data to set the pixel color.
 [`ImageBuffer::save`] writes the image to `output.png`.
 
-```rust,edition2018,no_run
-# use error_chain::error_chain;
-use std::sync::mpsc::{channel, RecvError};
-use threadpool::ThreadPool;
+```rust,edition2024,no_run
+use image::{Rgb, RgbImage};
 use num::complex::Complex;
-use image::{ImageBuffer, Pixel, Rgb};
-#
-# error_chain! {
-#     foreign_links {
-#         MpscRecv(RecvError);
-#         Io(std::io::Error);
-#         Image(image::ImageError);
-#     }
-# }
-#
-# // Function converting intensity values to RGB
-# // Based on http://www.efg2.com/Lab/ScienceAndEngineering/Spectra.htm
-# fn wavelength_to_rgb(wavelength: u32) -> Rgb<u8> {
-#     let wave = wavelength as f32;
-#
-#     let (r, g, b) = match wavelength {
-#         380..=439 => ((440. - wave) / (440. - 380.), 0.0, 1.0),
-#         440..=489 => (0.0, (wave - 440.) / (490. - 440.), 1.0),
-#         490..=509 => (0.0, 1.0, (510. - wave) / (510. - 490.)),
-#         510..=579 => ((wave - 510.) / (580. - 510.), 1.0, 0.0),
-#         580..=644 => (1.0, (645. - wave) / (645. - 580.), 0.0),
-#         645..=780 => (1.0, 0.0, 0.0),
-#         _ => (0.0, 0.0, 0.0),
-#     };
-#
-#     let factor = match wavelength {
-#         380..=419 => 0.3 + 0.7 * (wave - 380.) / (420. - 380.),
-#         701..=780 => 0.3 + 0.7 * (780. - wave) / (780. - 700.),
-#         _ => 1.0,
-#     };
-#
-#     let (r, g, b) = (normalize(r, factor), normalize(g, factor), normalize(b, factor));
-#     Rgb::from_channels(r, g, b, 0)
-# }
-#
-# // Maps Julia set distance estimation to intensity values
-# fn julia(c: Complex<f32>, x: u32, y: u32, width: u32, height: u32, max_iter: u32) -> u32 {
-#     let width = width as f32;
-#     let height = height as f32;
-#
-#     let mut z = Complex {
-#         // scale and translate the point to image coordinates
-#         re: 3.0 * (x as f32 - 0.5 * width) / width,
-#         im: 2.0 * (y as f32 - 0.5 * height) / height,
-#     };
-#
-#     let mut i = 0;
-#     for t in 0..max_iter {
-#         if z.norm() >= 2.0 {
-#             break;
-#         }
-#         z = z * z + c;
-#         i = t;
-#     }
-#     i
-# }
-#
-# // Normalizes color intensity values within RGB range
-# fn normalize(color: f32, factor: f32) -> u8 {
-#     ((color * factor).powf(0.8) * 255.) as u8
-# }
+use std::sync::mpsc::{channel};
+use threadpool::ThreadPool;
 
-fn main() -> Result<()> {
-    let (width, height) = (1920, 1080);
-    let mut img = ImageBuffer::new(width, height);
-    let iterations = 300;
+fn generate_color_linear_gradient(t: f32) -> [u8; 3] {
+    let t = t.clamp(0.0, 1.0);
 
+    let colors: &[[u8; 3]] = &[
+        [0, 0, 0],       // Black
+        [0, 0, 128],     // Dark Blue
+        [0, 0, 255],     // Blue
+        [0, 128, 255],   // Sky Blue
+        [255, 255, 255], // White
+        [255, 128, 0],   // Orange
+        [255, 0, 0],     // Red
+        [128, 0, 0],     // Dark Red
+        [0, 0, 0],       // Black
+    ];
+
+    let num_colors = colors.len() - 1;
+
+    let scaled_t = t * num_colors as f32;
+
+    let idx1 = scaled_t.floor() as usize;
+    let idx2 = (scaled_t.ceil() as usize).min(num_colors); 
+
+    let blend_factor = scaled_t - idx1 as f32;
+
+    let c1 = colors[idx1];
+    let c2 = colors[idx2];
+
+    [
+        (c1[0] as f32 * (1.0 - blend_factor) + c2[0] as f32 * blend_factor) as u8,
+        (c1[1] as f32 * (1.0 - blend_factor) + c2[1] as f32 * blend_factor) as u8,
+        (c1[2] as f32 * (1.0 - blend_factor) + c2[2] as f32 * blend_factor) as u8,
+    ]
+}
+
+fn juila(
+    x: u32,
+    y: u32,
+    width: u32,
+    height: u32,
+    zoom: f32,
+    c: Complex<f32>,
+    iterations: u32,
+    shift: Complex<f32>,
+) -> f32 {
+    let half_width = width as f32 * 0.5;
+    let half_height = height as f32 * 0.5;
+    let aspect_ratio = width as f32 / height as f32;
+
+    let mut z = Complex::new(
+        (x as f32 - half_width) / (zoom * half_width) * aspect_ratio,
+        (y as f32 - half_height) / (zoom * half_height),
+    ) + shift;
+
+    let mut i = 0;
+
+    while z.norm() < 4.0 && i <iterations {
+        let tmp = z.re*z.re - z.im * z.im  + c.re;
+        z.im = 2.0 * z.re * z.im + c.im;
+        z.re = tmp;
+        i += 1;
+    }
+    let norm = i as f32 / iterations as f32;
+    norm
+}
+
+fn main() {
+    let width: u32 = 1920;
+    let height: u32 = 1920;
+    let zoom = 1.0;
+    let mut img = RgbImage::new(width, height);
+
+    let iterations = 255;
     let c = Complex::new(-0.8, 0.156);
+    let shift = Complex::new(0.0, 0.0);
 
     let pool = ThreadPool::new(num_cpus::get());
     let (tx, rx) = channel();
 
-    for y in 0..height {
+    for x in 0..width {
         let tx = tx.clone();
-        pool.execute(move || for x in 0..width {
-                         let i = julia(c, x, y, width, height, iterations);
-                         let pixel = wavelength_to_rgb(380 + i * 400 / iterations);
-                         tx.send((x, y, pixel)).expect("Could not send data!");
-                     });
+        pool.execute(move || {
+            for y in 0..height {
+                let i = juila(x, y, width, height, zoom, c, iterations, shift);
+                let pixel = generate_color_linear_gradient(i);
+                tx.send((x, y, pixel)).expect("Could not send data!");
+            }
+        });
     }
 
     for _ in 0..(width * height) {
-        let (x, y, pixel) = rx.recv()?;
-        img.put_pixel(x, y, pixel);
+        let (x, y, pixel) = rx.recv().expect("Could not receive data!");
+        img.put_pixel(x, y, Rgb(pixel));
     }
-    let _ = img.save("output.png")?;
-    Ok(())
+
+    let _ = img.save("output.png").expect("Failed to save image");
 }
+
 ```
 
 [`ImageBuffer::new`]: https://docs.rs/image/*/image/struct.ImageBuffer.html#method.new

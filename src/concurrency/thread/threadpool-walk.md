@@ -8,7 +8,8 @@ present in the system found with [`num_cpus::get`].  [`Walkdir::new`] iterates
 the current directory and calls [`execute`] to perform the operations of reading
 and computing SHA256 hash.
 
-```rust,edition2018,no_run
+```rust,edition2024,no_run
+// cargo add num_cpus walkdir ring threadpool
 
 use walkdir::WalkDir;
 use std::fs::File;
@@ -18,13 +19,12 @@ use threadpool::ThreadPool;
 use std::sync::mpsc::channel;
 use ring::digest::{Context, Digest, SHA256};
 
-# // Verify the iso extension
-# fn is_iso(entry: &Path) -> bool {
-#     match entry.extension() {
-#         Some(e) if e.to_string_lossy().to_lowercase() == "iso" => true,
-#         _ => false,
-#     }
-# }
+fn is_iso(entry: &Path) -> bool {
+     match entry.extension() {
+         Some(e) if e.to_string_lossy().to_lowercase() == "iso" => true,
+         _ => false,
+     }
+}
 
 fn compute_digest<P: AsRef<Path>>(filepath: P) -> Result<(Digest, P), Error> {
     let mut buf_reader = BufReader::new(File::open(&filepath)?);
@@ -42,12 +42,12 @@ fn compute_digest<P: AsRef<Path>>(filepath: P) -> Result<(Digest, P), Error> {
     Ok((context.finish(), filepath))
 }
 
-fn main() -> Result<(), Error> {
+fn main()-> Result<(), Error> {
     let pool = ThreadPool::new(num_cpus::get());
 
     let (tx, rx) = channel();
 
-    for entry in WalkDir::new("/home/user/Downloads")
+    for entry in WalkDir::new(".")
         .follow_links(true)
         .into_iter()
         .filter_map(|e| e.ok())
