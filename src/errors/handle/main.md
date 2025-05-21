@@ -9,7 +9,7 @@
 As recommended in Rust by Example, [`Box`ing errors] is seen as an easy
 strategy for getting started.
 
-```rust,edition2018
+```rust,edition2024
 Box<dyn Error>
 ````
 
@@ -17,7 +17,7 @@ To understand what kind of error handling may be required study [Designing
 error types in Rust] and consider [`thiserror`] for libraries or [`anyhow`] as 
 a maintained error aggregation option.
 
-```rust,edition2018
+```rust,edition2024
 use thiserror::Error;
 
 #[derive(Error,Debug)]
@@ -30,7 +30,7 @@ pub enum MultiError {
 Application authors can compose enums using `anyhow` can import the `Result`
 type from the crate to provide auto-`Box`ing behavior
 
-```rust,edition2018,should_panic
+```rust,edition2024,should_panic
 use anyhow::Result;
 
 fn main() -> Result<()> {
@@ -56,7 +56,7 @@ first number. Returns uptime unless there is an error.
 Other recipes in this book will hide the [error-chain] boilerplate, and can be
 seen by expanding the code with the ⤢ button.
 
-```rust,edition2018,ignore
+```rust,edition2024,ignore
 use error_chain::error_chain;
 
 use std::fs::File;

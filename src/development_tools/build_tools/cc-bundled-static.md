@@ -30,7 +30,7 @@ anyhow = "1"
 
 ### `build.rs`
 
-```rust,edition2018,no_run
+```rust,edition2024,no_run
 fn main() {
     cc::Build::new()
         .file("src/hello.c")
@@ -55,7 +55,7 @@ void greet(const char* name) {
 
 ### `src/main.rs`
 
-```rust,edition2018,ignore
+```rust,edition2024,ignore
 use anyhow::Result;
 use std::ffi::CString;
 use std::os::raw::c_char;
