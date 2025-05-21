@@ -10,8 +10,8 @@ cannot be calculated.
 Escape sequences that are available for the
 [`DateTime::format`] can be found at [`chrono::format::strftime`].
 
-```rust,edition2018
-use chrono::{DateTime, Duration, Utc};
+```rust,edition2024
+use chrono::{DateTime, Duration, TimeDelta, Utc};
 
 fn day_earlier(date_time: DateTime<Utc>) -> Option<DateTime<Utc>> {
     date_time.checked_sub_signed(Duration::days(1))
@@ -30,7 +30,7 @@ fn main() {
         None => eprintln!("Almost three weeks from now overflows!"),
     }
 
-    match now.checked_add_signed(Duration::max_value()) {
+    match now.checked_add_signed(TimeDelta::MAX) {
         Some(x) => println!("{}", x),
         None => eprintln!("We can't use chrono to tell the time for the Solar System to complete more than one full orbit around the galactic center."),
     }
