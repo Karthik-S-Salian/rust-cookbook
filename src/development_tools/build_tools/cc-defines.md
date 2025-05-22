@@ -50,15 +50,14 @@ void print_app_info() {
 ### `src/main.rs`
 
 ```rust,edition2024,ignore
-extern {
+unsafe extern "C" {
     fn print_app_info();
 }
 
-fn main(){
+fn main() {
     unsafe {
         print_app_info();
-    }   
+    }
 }
 ```
-
 [cargo-env]: https://doc.rust-lang.org/cargo/reference/environment-variables.html

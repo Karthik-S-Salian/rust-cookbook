@@ -6,6 +6,16 @@ Linking a bundled C++ library is very similar to linking a bundled C library. Th
 
 
 ### `Cargo.toml`
+#include <stdio.h>
+
+
+void hello() {
+    printf("Hello from C!\n");
+}
+
+void greet(const char* name) {
+    printf("Hello, %s!\n", name);
+}
 
 ```toml
 [package]
@@ -42,14 +52,14 @@ int multiply(int x, int y) {
 ### `src/main.rs`
 
 ```rust,edition2024,ignore
-extern {
-    fn multiply(x : i32, y : i32) -> i32;
+unsafe extern "C" {
+    fn multiply(x: i32, y: i32) -> i32;
 }
 
-fn main(){
+fn main() {
     unsafe {
-        println!("{}", multiply(5,7));
-    }   
+        println!("{}", multiply(5, 7));
+    }
 }
 ```
 

@@ -59,6 +59,12 @@ void greet(const char* name) {
 use anyhow::Result;
 use std::ffi::CString;
 use std::os::raw::c_char;
+fn main() {
+    cc::Build::new()
+        .cpp(true)
+        .file("src/foo.cpp")
+        .compile("foo");   
+}
 
 fn prompt(s: &str) -> Result<String> {
     use std::io::Write;
@@ -69,7 +75,7 @@ fn prompt(s: &str) -> Result<String> {
     Ok(input.trim().to_string())
 }
 
-extern {
+unsafe extern "C" {
     fn hello();
     fn greet(name: *const c_char);
 }
