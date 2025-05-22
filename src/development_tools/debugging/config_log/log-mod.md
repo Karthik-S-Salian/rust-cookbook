@@ -38,7 +38,7 @@ Module declarations take comma separated entries formatted like
 `path::to::module=log_level`. Run the `test` application as follows:
 
 ```bash
-RUST_LOG="warn,test::foo=info,test::foo::bar=debug" ./test
+RUST_LOG="warn,test::foo=info,test::foo::bar=debug" cargo run
 ```
 
 Sets the default [`log::Level`] to `warn`, module `foo` and module `foo::bar`
