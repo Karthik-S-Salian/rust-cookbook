@@ -11,17 +11,9 @@ compared with 24 hours (24 * 60 * 60 seconds). [`Metadata::is_file`] filters
 out directories.
 
 ```rust,edition2024
-# use error_chain::error_chain;
-#
 use std::{env, fs};
+use anyhow::{Result,anyhow};
 
-# error_chain! {
-#     foreign_links {
-#         Io(std::io::Error);
-#         SystemTimeError(std::time::SystemTimeError);
-#     }
-# }
-#
 fn main() -> Result<()> {
     let current_dir = env::current_dir()?;
     println!(
@@ -42,7 +34,7 @@ fn main() -> Result<()> {
                 last_modified,
                 metadata.permissions().readonly(),
                 metadata.len(),
-                path.file_name().ok_or("No filename")?
+                path.file_name().ok_or_else(|| anyhow!("No filename"))?
             );
         }
     }
