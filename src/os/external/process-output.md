@@ -6,18 +6,9 @@ Runs `git log --oneline` as an external [`Command`] and inspects its [`Output`]
 using [`Regex`] to get the hash and message of the last 5 commits.
 
 ```rust,edition2024,no_run
-# use error_chain::error_chain;
-
+use anyhow::{Result,bail};
 use std::process::Command;
 use regex::Regex;
-#
-# error_chain!{
-#     foreign_links {
-#         Io(std::io::Error);
-#         Regex(regex::Error);
-#         Utf8(std::string::FromUtf8Error);
-#     }
-# }
 
 #[derive(PartialEq, Default, Clone, Debug)]
 struct Commit {
@@ -29,7 +20,7 @@ fn main() -> Result<()> {
     let output = Command::new("git").arg("log").arg("--oneline").output()?;
 
     if !output.status.success() {
-        error_chain::bail!("Command executed with failing error code");
+        bail!("Command executed with failing error code");
     }
 
     let pattern = Regex::new(r"(?x)
@@ -40,6 +31,7 @@ fn main() -> Result<()> {
         .lines()
         .filter_map(|line| pattern.captures(line))
         .map(|cap| {
+                println!("{}",cap[0].to_string());
                  Commit {
                      hash: cap[1].to_string(),
                      message: cap[2].trim().to_string(),
