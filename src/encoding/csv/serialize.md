@@ -9,18 +9,10 @@ such as numbers, floats, and options use [`serialize`]. Since CSV
 writer uses internal buffer, always explicitly [`flush`] when done.
 
 ```rust,edition2024
-# use error_chain::error_chain;
-
+use csv::Error;
 use std::io;
-#
-# error_chain! {
-#     foreign_links {
-#         CSVError(csv::Error);
-#         IOError(std::io::Error);
-#    }
-# }
 
-fn main() -> Result<()> {
+fn main() -> Result<(),Error> {
     let mut wtr = csv::Writer::from_writer(io::stdout());
 
     wtr.write_record(&["Name", "Place", "ID"])?;

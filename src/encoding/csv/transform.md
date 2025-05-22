@@ -9,20 +9,10 @@ csv file, and [serde] to deserialize and serialize the rows to and from bytes.
 See [`csv::Reader::deserialize`], [`serde::Deserialize`], and [`std::str::FromStr`]
 
 ```rust,edition2024
-# use error_chain::error_chain;
+use anyhow::{Error, Result};
 use csv::{Reader, Writer};
-use serde::{de, Deserialize, Deserializer};
+use serde::{Deserialize, Deserializer, de};
 use std::str::FromStr;
-#
-# error_chain! {
-#    foreign_links {
-#        CsvError(csv::Error);
-#        ParseInt(std::num::ParseIntError);
-#        CsvInnerError(csv::IntoInnerError<Writer<Vec<u8>>>);
-#        IO(std::fmt::Error);
-#        UTF8(std::string::FromUtf8Error);
-#    }
-# }
 
 #[derive(Debug)]
 struct HexColor {
@@ -43,7 +33,7 @@ impl FromStr for HexColor {
     fn from_str(hex_color: &str) -> std::result::Result<Self, Self::Err> {
         let trimmed = hex_color.trim_matches('#');
         if trimmed.len() != 6 {
-            Err("Invalid length of hex string".into())
+            anyhow::bail!("Invalid length of hex string");
         } else {
             Ok(HexColor {
                 red: u8::from_str_radix(&trimmed[..2], 16)?,
@@ -88,6 +78,7 @@ magenta,#ff00ff"
     println!("{}", written);
     Ok(())
 }
+
 ```
 
 [`csv::Reader::deserialize`]: https://docs.rs/csv/\*/csv/struct.Reader.html#method.deserialize

@@ -5,18 +5,10 @@
 Returns _only_ the rows from `data` with a field that matches `query`.
 
 ```rust,edition2024
-# use error_chain::error_chain;
-
+use csv::Error;
 use std::io;
-#
-# error_chain!{
-#     foreign_links {
-#         Io(std::io::Error);
-#         CsvError(csv::Error);
-#     }
-# }
 
-fn main() -> Result<()> {
+fn main() -> Result<(),Error> {
     let query = "CA";
     let data = "\
 City,State,Population,Latitude,Longitude

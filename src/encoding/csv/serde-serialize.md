@@ -6,16 +6,9 @@ The following example shows how to serialize custom structs as CSV records using
 the [serde] crate.
 
 ```rust,edition2024
-# use error_chain::error_chain;
+use csv::Error;
 use serde::Serialize;
 use std::io;
-#
-# error_chain! {
-#    foreign_links {
-#        IOError(std::io::Error);
-#        CSVError(csv::Error);
-#    }
-# }
 
 #[derive(Serialize)]
 struct Record<'a> {
@@ -24,7 +17,7 @@ struct Record<'a> {
     id: u64,
 }
 
-fn main() -> Result<()> {
+fn main() -> Result<(),Error> {
     let mut wtr = csv::Writer::from_writer(io::stdout());
 
     let rec1 = Record { name: "Mark", place: "Melbourne", id: 56};

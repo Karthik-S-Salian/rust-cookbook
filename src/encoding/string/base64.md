@@ -2,26 +2,21 @@
 
 [![base64-badge]][base64] [![cat-encoding-badge]][cat-encoding]
 
-Encodes byte slice into `base64` String using [`encode`]
-and decodes it with [`decode`].
+Encodes a byte slice into a Base64 String using [`general_purpose::STANDARD.encode`]
+and decodes it using [`general_purpose::STANDARD.decode`]
 
 ```rust,edition2024
-# use error_chain::error_chain;
-
+use anyhow::Result;
 use std::str;
-use base64::{encode, decode};
-#
-# error_chain! {
-#     foreign_links {
-#         Base64(base64::DecodeError);
-#         Utf8Error(str::Utf8Error);
-#     }
-# }
+
+use base64::{engine::general_purpose::STANDARD, Engine as _};
 
 fn main() -> Result<()> {
     let hello = b"hello rustaceans";
-    let encoded = encode(hello);
-    let decoded = decode(&encoded)?;
+
+    let encoded = STANDARD.encode(hello);
+
+    let decoded = STANDARD.decode(&encoded)?;
 
     println!("origin: {}", str::from_utf8(hello)?);
     println!("base64 encoded: {}", encoded);
@@ -29,7 +24,8 @@ fn main() -> Result<()> {
 
     Ok(())
 }
+
 ```
 
-[`decode`]: https://docs.rs/base64/*/base64/fn.decode.html
-[`encode`]: https://docs.rs/base64/*/base64/fn.encode.html
+[`general_purpose::STANDARD.decode`]: https://docs.rs/base64/*/base64/engine/trait.Engine.html#method.decode
+[`general_purpose::STANDARD.encode`]: https://docs.rs/base64/*/base64/engine/trait.Engine.html#method.encode
