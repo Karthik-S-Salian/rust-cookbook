@@ -27,64 +27,40 @@ pub enum MultiError {
 }
 ```
 
+# Anyhow 
+<!-- TODO anyhow explaination -->
 Application authors can compose enums using `anyhow` can import the `Result`
 type from the crate to provide auto-`Box`ing behavior
 
-```rust,edition2024,should_panic
-use anyhow::Result;
-
-fn main() -> Result<()> {
-   let my_string = "yellow".to_string();  
-   let _my_int = my_string.parse::<i32>()?;
-   Ok(())
-}
-```
-
-# Error Chain (2015-2018)
-Handles error that occur when trying to open a file that does not
-exist. It is achieved by using [error-chain], a library that takes
-care of a lot of boilerplate code needed in order to [handle errors in Rust].
-
-`Io(std::io::Error)` inside [`foreign_links`] allows automatic
-conversion from [`std::io::Error`] into [`error_chain!`] defined type
-implementing the [`Error`] trait.
-
-The below recipe will tell how long the system has been running by
-opening the Unix file `/proc/uptime` and parse the content to get the
-first number. Returns uptime unless there is an error.
-
-Other recipes in this book will hide the [error-chain] boilerplate, and can be
-seen by expanding the code with the ⤢ button.
-
 ```rust,edition2024,ignore
-use error_chain::error_chain;
-
 use std::fs::File;
 use std::io::Read;
-
-error_chain!{
-    foreign_links {
-        Io(std::io::Error);
-        ParseInt(::std::num::ParseIntError);
-    }
-}
+use anyhow::{Result, Context};
 
 fn read_uptime() -> Result<u64> {
     let mut uptime = String::new();
-    File::open("/proc/uptime")?.read_to_string(&mut uptime)?;
 
-    Ok(uptime
+    File::open("/proc/uptime")
+        .context("Failed to open /proc/uptime")?
+        .read_to_string(&mut uptime)
+        .context("Failed to read from /proc/uptime")?;
+    
+    let seconds = uptime
         .split('.')
         .next()
-        .ok_or("Cannot parse uptime data")?
-        .parse()?)
+        .context("Cannot parse uptime data")?
+        .parse::<u64>()
+        .context("Failed to parse uptime as u64")?;
+
+    Ok(seconds)
 }
 
-fn main() {
+fn main() -> Result<()> {
     match read_uptime() {
         Ok(uptime) => println!("uptime: {} seconds", uptime),
-        Err(err) => eprintln!("error: {}", err),
-    };
+        Err(err) => eprintln!("error: {:?}", err),
+    }
+    Ok(())
 }
 ```
 
