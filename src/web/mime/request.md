@@ -12,18 +12,10 @@ The [`mime`] crate also defines some commonly used MIME types.
 Note that the [`reqwest::header`] module is exported from the [`http`] crate.
 
 ```rust,edition2024,no_run
-use error_chain::error_chain;
+use anyhow::Result;
 use mime::Mime;
 use std::str::FromStr;
 use reqwest::header::CONTENT_TYPE;
-
- error_chain! {
-    foreign_links {
-        Reqwest(reqwest::Error);
-        Header(reqwest::header::ToStrError);
-        Mime(mime::FromStrError);
-    }
- }
 
 #[tokio::main]
 async fn main() -> Result<()> {

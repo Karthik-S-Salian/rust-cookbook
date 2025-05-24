@@ -11,20 +11,12 @@ The request target <http://httpbin.org/headers> responds with
 a JSON dict containing all request headers for easy verification.
 
 ```rust,edition2024,no_run
-use error_chain::error_chain;
-
+use anyhow::Result;
 use reqwest::Url;
 use reqwest::blocking::Client;
 use reqwest::header::USER_AGENT;
 use serde::Deserialize;
 use std::collections::HashMap;
-
-error_chain! {
-    foreign_links {
-        Reqwest(reqwest::Error);
-        UrlParse(url::ParseError);
-    }
-}
 
 #[derive(Deserialize, Debug)]
 pub struct HeadersEcho {

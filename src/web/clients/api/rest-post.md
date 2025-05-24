@@ -11,19 +11,13 @@ provides arbitrary JSON body. Call to [`RequestBuilder::json`] sets the request
 body. [`RequestBuilder::basic_auth`] handles authentication. The call to
 [`RequestBuilder::send`] synchronously executes the requests.
 
+<!-- TODO: didnt test this code -->
 ```rust,edition2024,no_run
-use error_chain::error_chain;
 use serde::Deserialize;
 use serde_json::json;
 use std::env;
 use reqwest::Client;
-
-error_chain! {
-    foreign_links {
-        EnvVar(env::VarError);
-        HttpRequest(reqwest::Error);
-    }
-}
+use anyhow::Result;
 
 #[derive(Deserialize, Debug)]
 struct Gist {

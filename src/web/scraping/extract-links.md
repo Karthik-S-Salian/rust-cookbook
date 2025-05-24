@@ -9,13 +9,34 @@ Call [`filter_map`] on the [`Selection`] retrieves URLs
 from links that have the "href" [`attr`] (attribute).
 
 ```rust,edition2024,no_run
-mod links {
-  {{#include ../../../crates/web/src/links.rs}}
+use select::document::Document;
+use select::predicate::Name;
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+pub enum LinkError {
+    #[error("Reqwest error: {0}")]
+    ReqError(#[from] reqwest::Error),
+    #[error("IO error: {0}")]
+    IoError(#[from] std::io::Error),
+}
+
+pub async fn get_links(page: &str) -> Result<Vec<Box<str>>, LinkError> {
+    let res = reqwest::get(page).await?.text().await?;
+
+    let links = Document::from(res.as_str())
+        .find(Name("a"))
+        .filter_map(|node| node.attr("href"))
+        .into_iter()
+        .map(|link| Box::<str>::from(link.to_string()))
+        .collect();
+
+    Ok(links)
 }
 
 #[tokio::main]
-async fn main() -> Result<(), links::LinkError> {
-    let page_links = links::get_links("https://www.rust-lang.org/en-US/").await?;
+async fn main() -> Result<(), LinkError> {
+    let page_links = get_links("https://www.rust-lang.org/en-US/").await?;
     for link in page_links {
         println!("{}", link);
     }
@@ -23,7 +44,7 @@ async fn main() -> Result<(), links::LinkError> {
 }
 ```
 
-[`attr`]: https://docs.rs/select/*/select/node/struct.Node.html#method.attr
+[`attr`]: https://devloop-26.app/
 [`Document::from_read`]: https://docs.rs/select/*/select/document/struct.Document.html#method.from_read
 [`filter_map`]: https://doc.rust-lang.org/core/iter/trait.Iterator.html#method.filter_map
 [`find`]: https://docs.rs/select/*/select/document/struct.Document.html#method.find

@@ -12,23 +12,49 @@ references to the original document.
 
 ```rust,edition2024,no_run
 mod wiki {
-  {{#include ../../../crates/web/src/wiki.rs}}
+    use regex::Regex;
+    use std::borrow::Cow;
+    use std::collections::HashSet;
+    use std::sync::LazyLock;
+
+    pub fn extract_links(content: &str) -> HashSet<Cow<str>> {
+        static WIKI_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+            Regex::new(
+                r"(?x)
+                \[\[(?P<internal>[^\[\]|]*)[^\[\]]*\]\]    # internal links
+                |
+                (url=|URL\||\[)(?P<external>http.*?)[ \|}] # external links
+            ",
+            )
+            .unwrap()
+        });
+
+        let links: HashSet<_> = WIKI_REGEX
+            .captures_iter(content)
+            .map(|c| match (c.name("internal"), c.name("external")) {
+                (Some(val), None) => Cow::from(val.as_str()),
+                (None, Some(val)) => Cow::from(val.as_str()),
+                _ => unreachable!(),
+            })
+            .collect::<HashSet<_>>();
+
+        links
+    }
 }
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-  let content = reqwest::get(
-    "https://en.wikipedia.org/w/index.php?title=Rust_(programming_language)&action=raw",
-  )
-  .await?
-  .text()
-  .await?;
+    let content = reqwest::get(
+        "https://en.wikipedia.org/w/index.php?title=Rust_(programming_language)&action=raw",
+    )
+    .await?
+    .text()
+    .await?;
 
-  println!("{:#?}", wiki::extract_links(content.as_str()));
+    println!("{:#?}", wiki::extract_links(content.as_str()));
 
-  Ok(())
+    Ok(())
 }
-
 ```
 
 [`Cow`]: https://doc.rust-lang.org/std/borrow/enum.Cow.html

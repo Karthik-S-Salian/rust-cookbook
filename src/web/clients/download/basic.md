@@ -10,17 +10,10 @@ Creates a target [`File`] with name obtained from [`Response::url`] within
 The temporary directory is automatically removed on program exit.
 
 ```rust,edition2024,no_run
-use error_chain::error_chain;
 use std::io::Write;
 use std::fs::File;
 use tempfile::Builder;
-
-error_chain! {
-     foreign_links {
-         Io(std::io::Error);
-         HttpRequest(reqwest::Error);
-     }
-}
+use anyhow::Result;
 
 #[tokio::main]
 async fn main() -> Result<()> {
