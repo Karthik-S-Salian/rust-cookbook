@@ -25,6 +25,7 @@ fn extract_hashtags(text: &str) -> HashSet<&str> {
 fn main() {
     let tweet = "Hey #world, I just got my new #dog, say hello to Till. #dog #forever #2 #_ ";
     let tags = extract_hashtags(tweet);
+    println!("{:?}",tags);
     assert!(tags.contains("#dog") && tags.contains("#forever") && tags.contains("#world"));
     assert_eq!(tags.len(), 3);
 }

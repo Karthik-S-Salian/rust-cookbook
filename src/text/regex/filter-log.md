@@ -11,19 +11,11 @@ Since backslashes are very common in regular expressions, using
 [raw string literals] makes them more readable.
 
 ```rust,edition2024,no_run
-# use error_chain::error_chain;
-
+use anyhow::Result;
 use std::fs::File;
 use std::io::{BufReader, BufRead};
 use regex::RegexSetBuilder;
 
-# error_chain! {
-#     foreign_links {
-#         Io(std::io::Error);
-#         Regex(regex::Error);
-#     }
-# }
-#
 fn main() -> Result<()> {
     let log_path = "application.log";
     let buffered = BufReader::new(File::open(log_path)?);
