@@ -296,13 +296,16 @@ if they are not required for the example.  Avoid inline comments, preferring
 explanation in the description.
 
 > ```rust,edition2024
-> use rand::distributions::{Normal, Distribution};
->
-> fn main() {
->    let mut rng = rand::thread_rng();
->    let normal = Normal::new(2.0, 3.0);
->    let v = normal.sample(&mut rng);
->    println!("{} is from a N(2, 9) distribution", v)
+> use rand_distr::{Distribution, Normal, NormalError};
+> use rand::rng;
+> 
+> fn main() -> Result<(), NormalError> {
+>     let mut rng = rng();
+>     
+>     let normal = Normal::new(2.0, 3.0)?;
+>     let v = normal.sample(&mut rng);
+>     println!("{} is from a N(2, 9) distribution", v);
+>     Ok(())
 > }
 > ```
 

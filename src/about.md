@@ -60,8 +60,8 @@ Consider this example for "generate random numbers within a range":
 use rand::Rng;
 
 fn main() {
-    let mut rng = rand::thread_rng();
-    println!("Random f64: {}", rng.gen::<f64>());
+    let mut rng = rand::rng();
+    println!("Random f64: {}", rng.random::<f64>());
 }
 ```
 
@@ -101,10 +101,7 @@ Handling multiple types of these traits can be simplified using [`anyhow`]
 or specified with an `enum` which macros exist to make this easier within
 [`thiserror`] for library authors.
 
-Error chain has been shown in this book for historical reasons before Rust
-`std` and crates represented macro use as a preference.  For more background
-on error handling in Rust, read [this page of the Rust book][error-docs]
-and [this blog post][error-blog].
+<!-- TODO: about error handling -->
 
 ## A note about crate representation
 
@@ -129,9 +126,6 @@ as are crates that are pending evaluation.
 {{#include links.md}}
 
 [index]: intro.html
-[error-docs]: https://doc.rust-lang.org/book/error-handling.html
-[error-blog]: https://brson.github.io/2016/11/30/starting-with-error-chain
-[error-chain]: https://docs.rs/error-chain/
 [Rust Libz Blitz]: https://internals.rust-lang.org/t/rust-libz-blitz/5184
 [crates.io]: https://crates.io
 [docs.rs]: https://docs.rs

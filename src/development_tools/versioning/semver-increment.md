@@ -32,11 +32,11 @@ fn main() -> Result<(), SemVerError> {
     println!("New patch release: v{}", parsed_version);
 
     parsed_version.minor+=1;
-    assert_eq!(parsed_version.to_string(), "0.3.0");
+    assert_eq!(parsed_version.to_string(), "0.3.7");
     println!("New minor release: v{}", parsed_version);
 
     parsed_version.major+=1;
-    assert_eq!(parsed_version.to_string(), "1.0.0");
+    assert_eq!(parsed_version.to_string(), "1.3.7");
     println!("New major release: v{}", parsed_version);
 
     Ok(())
